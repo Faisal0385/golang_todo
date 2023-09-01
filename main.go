@@ -1,7 +1,6 @@
 package main
 
 import (
-	"log"
 	"net/http"
 	logincontroller "todolist/controllers/loginController"
 	registercontroller "todolist/controllers/registerController"
@@ -51,6 +50,42 @@ func main() {
 	router.POST("/store/register", registercontroller.RegisterStoreController)
 	router.POST("/update/register", registercontroller.RegisterUpdateController)
 
+	// Define a route that renders the template
+	router.GET("/status/wise", func(c *gin.Context) {
+		var tasks []models.Task
+		models.DB.Model(&tasks).Find(&tasks)
+
+		var users []models.User
+		models.DB.Model(&users).Find(&users)
+
+		var newCount int64
+		var progressCount int64
+		var completedCount int64
+		var cancelledCount int64
+		models.DB.Model(&tasks).Where("status = ?", "new").Count(&newCount)
+		models.DB.Model(&tasks).Where("status = ?", "progress").Count(&progressCount)
+		models.DB.Model(&tasks).Where("status = ?", "completed").Count(&completedCount)
+		models.DB.Model(&tasks).Where("status = ?", "cancelled").Count(&cancelledCount)
+
+		data := gin.H{
+			"title":          "Task Status Wise Page",
+			"values":         tasks,
+			"users":          users,
+			"newCount":       newCount,
+			"progressCount":  progressCount,
+			"completedCount": completedCount,
+			"cancelledCount": cancelledCount,
+		}
+		c.HTML(http.StatusOK, "status_wise.html", data)
+	})
+
+	router.GET("/forgot/password", func(c *gin.Context) {
+		data := gin.H{
+			"title": "Forgot Password Page",
+		}
+		c.HTML(http.StatusOK, "forgot_password.html", data)
+	})
+
 	router.GET("/logout", func(c *gin.Context) {
 		session := sessions.Default(c)
 		session.Clear() // Clear session data
@@ -74,7 +109,6 @@ func main() {
 		var user []models.User
 
 		models.DB.Model(&user).Where("email = ?", userData).First(&user)
-		log.Println(user[0])
 		data := gin.H{
 			"title":  "Task List Page",
 			"values": user[0],

@@ -1,7 +1,6 @@
 package registercontroller
 
 import (
-	"log"
 	"net/http"
 	"todolist/models"
 
@@ -20,6 +19,15 @@ type ErrorMessage struct {
 }
 
 func RegisterController(c *gin.Context) {
+
+	session := sessions.Default(c)
+	user := session.Get("user")
+	if user != nil {
+		// User not authenticated, redirect to login
+		c.Redirect(http.StatusSeeOther, "/")
+		c.Abort() // Stop the request chain
+		return
+	}
 
 	data := gin.H{
 		"title": "Registration Page",
@@ -124,72 +132,7 @@ func RegisterUpdateController(c *gin.Context) {
 		return
 	}
 
-	log.Println(email)
-
 	var user []models.User
 	models.DB.Model(&user).Where("email = ?", email).Find(&user)
-	log.Println(user)
 
-	// name := c.PostForm("name")
-	// password := c.PostForm("password")
-
-	// if name == "" {
-	// 	c.HTML(http.StatusBadRequest, "profile.html", gin.H{
-	// 		"error":  "Name field is required!!",
-	// 		"values": user[0],
-	// 	})
-	// 	return
-	// }
-
-	// if password == "" {
-
-	// 	result := models.DB.Model(&user).Where("email = ?", email).Updates(models.User{Name: name})
-
-	// 	if result.Error != nil {
-	// 		data := gin.H{
-	// 			"error":  ErrorMessage{"Somthing Went Wrong!!"},
-	// 			"values": user[0],
-	// 		}
-	// 		c.HTML(http.StatusOK, "profile.html", data)
-	// 		return
-	// 	} else {
-
-	// 		data := gin.H{"message": "Profile Updated Successfully.", "values": user[0]}
-	// 		c.HTML(http.StatusOK, "profile.html", data)
-	// 		return
-	// 	}
-	// } else {
-	// 	if len(password) < PasswordMinLength {
-	// 		c.HTML(http.StatusBadRequest, "profile.html", gin.H{
-	// 			"error":  "Password should be more than 5 characters!!",
-	// 			"values": user[0],
-	// 		})
-	// 		return
-	// 	}
-
-	// 	hashedPassword, err := bcrypt.GenerateFromPassword([]byte(password), bcrypt.DefaultCost)
-	// 	if err != nil {
-	// 		c.HTML(http.StatusBadRequest, "profile.html", gin.H{
-	// 			"error":  "Password should be more than 5 characters!!",
-	// 			"values": user[0],
-	// 		})
-	// 		return
-	// 	}
-
-	// 	result := models.DB.Model(&user).Where("email = ?", email).Updates(models.User{Password: string(hashedPassword)})
-
-	// 	if result.Error != nil {
-	// 		data := gin.H{
-	// 			"error":  ErrorMessage{"Password failed to hash!!"},
-	// 			"values": user[0],
-	// 		}
-	// 		c.HTML(http.StatusOK, "profile.html", data)
-	// 		return
-	// 	} else {
-
-	// 		data := gin.H{"message": "Profile Updated Successfully.", "values": user[0]}
-	// 		c.HTML(http.StatusOK, "profile.html", data)
-	// 		return
-	// 	}
-	// }
 }
