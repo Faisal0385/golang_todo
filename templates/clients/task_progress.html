@@ -90,7 +90,7 @@
                                 <tr>
                                     <th scope="row">{{ $key }}</th>
                                     <td>{{ .Task }}</td>
-                                    <td>{{ .Status }}</td>
+                                    <td class="text-uppercase">{{ .Status }}</td>
                                     <td>
                                         <a class="btn btn-sm btn-warning" href="/edit/task/{{ .ID }}">Edit</a>
                                         <a class="btn btn-sm btn-danger" href="/delete/{{ .ID }}">Delete</a>
